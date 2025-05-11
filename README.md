@@ -16,6 +16,11 @@
 
 ---
 
+<div>
+    [![Try Out Mock Ups ](https://abhijatsarari.github.io/LeadGenix/)]
+</div>
+
+
 ## 📋 Overview
 
 LeadGenix is an innovative AI-powered solution designed to revolutionize how GroMo Partners identify, prioritize, and engage prospects. By leveraging advanced machine learning and generative AI technologies, LeadGenix transforms raw data into actionable insights and personalized outreach strategies.
