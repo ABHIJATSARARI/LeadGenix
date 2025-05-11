@@ -86,7 +86,7 @@ LeadGenix is built on a robust AWS-powered infrastructure:
 ## 🚀 Implementation Roadmap
 
 <div align="center">
-    <img src="./assets/roadmap.png" alt="Implementation Roadmap" width="700">
+    <img src="/leadgenix_flow.png" alt="Implementation Roadmap" width="700">
 </div>
 
 1. **Foundation & Data Integration** (Current Phase)
@@ -180,7 +180,7 @@ We welcome contributions to the LeadGenix project! Please see our [CONTRIBUTING]
 ---
 
 <div align="center">
-    <img src="./assets/footer.png" alt="LeadGenix Footer" width="700">
+    <img src="/logo1.png" alt="LeadGenix Footer" width="700">
     <p>© 2025 LeadGenix | Empowering GroMo Partners with Intelligent Lead Generation</p>
     <p>
         <a href="https://twitter.com/leadgenix">Twitter</a> •
