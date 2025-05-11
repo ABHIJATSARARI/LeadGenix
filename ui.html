@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadGenix App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-container {
+            max-width: 420px;
+            min-height: 100vh;
+            margin: 0 auto;
+            background-color: #f0f4f8; /* Light page background */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.04); /* Softer shadow for container */
+        }
+        .header-main {
+             background-color: #0f172a; /* Dark blue for header consistency */
+        }
+        .main-content-area { /* Renamed for clarity */
+            flex-grow: 1;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 20px;
+            margin-top: -20px; /* Overlap effect */
+            z-index: 10;
+            overflow-y: auto; /* Ensure scrolling within this area */
+        }
+        .nav-bar {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* Softer shadow */
+        }
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item.active, .nav-item:active {
+            color: #2563eb; /* Brighter blue for active */
+            transform: translateY(-2px);
+        }
+        .nav-item.active .nav-icon, .nav-item:active .nav-icon {
+             transform: scale(1.1);
+        }
+        .lead-item:hover {
+            background-color: #1e293b;
+        }
+        .lead-item.selected {
+            background-color: #1e293b; /* Consistent selected color */
+            box-shadow: 0 0 0 2px #2563eb; /* Blue ring for selected */
+        }
+        .whatsapp-button {
+            background-color: #25D366;
+            transition: background-color 0.2s ease;
+        }
+        .whatsapp-button:hover {
+            background-color: #1DAE50;
+        }
+        .refresh-button {
+            border: 1px solid #475569; /* Slightly lighter border */
+            transition: all 0.2s ease;
+        }
+        .refresh-button:hover {
+            background-color: #334155;
+            color: #ffffff;
+        }
+        .lead-score-card-dynamic { /* Renamed for clarity */
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); /* Updated gradient */
+        }
+        .message-preview-card {
+            background-color: #1e293b;
+        }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1e293b; /* Dark background for modal */
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-button {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        .modal-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Filter/Sort Styles */
+        .filter-sort-controls input[type="text"] {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+        }
+        .filter-sort-controls input[type="text"]::placeholder {
+            color: #64748b;
+        }
+        .sort-button {
+            background-color: #334155;
+            border: 1px solid #475569;
+            transition: all 0.2s ease;
+        }
+        .sort-button:hover, .sort-button.active-sort {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* Tab Content Area */
+        .tab-content {
+            display: none; /* Hidden by default */
+        }
+        .tab-content.active {
+            display: block; /* Shown when active */
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body class="bg-slate-900 flex justify-center items-start md:items-center min-h-screen">
+    <div class="app-container shadow-2xl">
+        <header class="header-main p-5 pt-8 text-white">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">LeadGenix</h1>
+                <div class="text-xs font-semibold bg-blue-600 px-3 py-1 rounded-full">GRO</div>
+            </div>
+            <p class="mt-1 text-sm text-slate-300">AI-Driven Lead Scoring and Outreach Automation</p>
+        </header>
+
+        <div class="main-content-area">
+            <div id="homeContent" class="tab-content active">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-slate-100">Lead Dashboard</h2>
+                    <button id="refreshButton" class="refresh-button text-slate-300 text-xs font-medium px-3 py-1.5 rounded-lg flex items-center">
+                        <i id="refreshIcon" class="fas fa-sync-alt mr-1.5 text-xs"></i><span id="refreshText">REFRESH</span>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mb-5">Prioritized leads based on AI scoring</p>
+
+                <div class="lead-score-card-dynamic text-white p-5 rounded-xl shadow-lg mb-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm opacity-80">Lead Score</p>
+                            <p id="dynamicLeadScore" class="text-5xl font-bold">--</p>
+                            <p id="dynamicLeadScoreTier" class="text-sm font-semibold bg-gray-500 px-2 py-0.5 rounded-full inline-block mt-1">N/A</p>
+                        </div>
+                        <div class="text-right text-xs opacity-90">
+                            <p id="dynamicLeadName" class="font-semibold text-base mb-1">Select a Lead</p>
+                            <p id="dynamicPoint1" class="font-medium mb-0.5"></p>
+                            <p id="dynamicPoint2" class="font-medium mb-0.5"></p>
+                            <p id="dynamicPoint3" class="font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-sort-controls mb-4">
+                    <input type="text" id="filterName" class="w-full p-2.5 rounded-lg text-sm mb-3" placeholder="Search by name...">
+                    <div class="flex space-x-2 text-xs">
+                        <button id="sortByScoreBtn" data-sort="score" class="sort-button flex-1 text-slate-300 py-2 px-3 rounded-md">Score <i class="fas fa-arrow-down-short-wide ml-1"></i></button>
+                        <button id="sortByNameBtn" data-sort="name" class="sort-button flex-1 text-slate-300 py-2 px-3 rounded-md">Name <i class="fas fa-sort-alpha-down ml-1"></i></button>
+                    </div>
+                </div>
+
+                <div id="leadsContainer" class="space-y-3 mb-6 min-h-[100px]">
+                    </div>
+                <p id="noLeadsMessage" class="text-center text-slate-400 py-4 hidden">No leads found.</p>
+
+
+                <div class="message-preview-card p-4 rounded-xl shadow-lg">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-2">MESSAGE PREVIEW</h3>
+                    <p id="messagePreviewText" class="text-sm text-slate-200 leading-relaxed">
+                        Select a lead to see the message preview.
+                    </p>
+                </div>
+            </div>
+
+            <div id="analyticsContent" class="tab-content p-5 text-center">
+                <i class="fas fa-chart-pie text-5xl text-blue-400 mb-4"></i>
+                <h2 class="text-2xl font-semibold text-slate-100 mb-2">Analytics Dashboard</h2>
+                <p class="text-slate-300">Detailed charts and insights about your leads will appear here.</p>
+                <p class="text-sm text-slate-400 mt-4">(Content for Analytics Coming Soon)</p>
+            </div>
+
+            <div id="profileContent" class="tab-content p-5 text-center">
+                <i class="fas fa-user-cog text-5xl text-blue-400 mb-4"></i>
+                <h2 class="text-2xl font-semibold text-slate-100 mb-2">User Profile</h2>
+                <p class="text-slate-300">Manage your account settings and preferences.</p>
+                 <div class="mt-6 space-y-3 text-left">
+                    <div class="bg-slate-700 p-3 rounded-lg"><span class="font-medium text-slate-200">Name:</span> User Name</div>
+                    <div class="bg-slate-700 p-3 rounded-lg"><span class="font-medium text-slate-200">Email:</span> user@example.com</div>
+                    <button class="w-full mt-4 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg transition-colors">Log Out</button>
+                </div>
+                <p class="text-sm text-slate-400 mt-6">(Content for Profile Coming Soon)</p>
+            </div>
+        </div>
+
+
+        <nav class="nav-bar p-3 sticky bottom-0">
+            <div class="flex justify-around items-center">
+                <button data-tab="home" class="nav-item active flex flex-col items-center text-slate-600 hover:text-blue-500 w-1/4">
+                    <i class="fas fa-home text-xl mb-0.5 nav-icon"></i>
+                    <span class="text-xs font-medium">Home</span>
+                </button>
+                <button data-tab="leads" class="nav-item flex flex-col items-center text-slate-600 hover:text-blue-500 w-1/4">
+                    <i class="fas fa-users text-xl mb-0.5 nav-icon"></i>
+                    <span class="text-xs font-medium">Leads</span>
+                </button>
+                <button data-tab="analytics" class="nav-item flex flex-col items-center text-slate-600 hover:text-blue-500 w-1/4">
+                    <i class="fas fa-chart-line text-xl mb-0.5 nav-icon"></i>
+                    <span class="text-xs font-medium">Analytics</span>
+                </button>
+                <button data-tab="profile" class="nav-item flex flex-col items-center text-slate-600 hover:text-blue-500 w-1/4">
+                    <i class="fas fa-user-circle text-xl mb-0.5 nav-icon"></i>
+                    <span class="text-xs font-medium">Profile</span>
+                </button>
+            </div>
+        </nav>
+
+        <div id="customModal" class="modal-overlay">
+            <div class="modal-content">
+                <p id="modalMessage" class="text-base"></p>
+                <button id="modalCloseButton" class="modal-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        let leadsData = [
+            { id: 1, name: "Deepanshu Singh", age: 35, location: "Ludhiana", score: 85, status: "New", customPoints: ["Past Savings Account", "Age: 35", "Festive Offer Eligible"], message: "Deepanshuji! Special FD Offers are available to grow your savings this festive season. Give me a call to know more." },
+            { id: 2, name: "Sanjana Patel", age: 42, location: "Surat", score: 78, status: "Contacted", customPoints: ["Existing Customer", "Age: 42", "High Engagement"], message: "Sanjanaji, looking to secure your future? Our new investment plans are perfect for you. Let's connect!" },
+            { id: 3, name: "Aman Yadav", age: 52, location: "Bhopal", score: 92, status: "New", customPoints: ["High Net Worth", "Age: 52", "Retirement Planning"], message: "Amanji, congratulations on your upcoming retirement! We have excellent pension plans. Interested in learning more?" },
+            { id: 4, name: "Priya Sharma", age: 28, location: "Jaipur", score: 65, status: "Follow-up", customPoints: ["Young Professional", "Age: 28", "First-time Investor"], message: "Priyaji, start your investment journey today! We have beginner-friendly mutual funds. Call us for details." },
+            { id: 5, name: "Rajesh Kumar", age: 45, location: "Delhi", score: 72, status: "New", customPoints: ["Small Business Owner", "Age: 45", "Loan Inquiry"], message: "Rajeshji, we have tailored loan solutions for your business expansion. Would you like to discuss?" }
+        ];
+        let currentSort = { type: 'score', direction: 'desc' }; // Default sort
+        let currentFilter = '';
+
+        // --- DOM ELEMENTS ---
+        const leadsContainer = document.getElementById('leadsContainer');
+        const messagePreviewText = document.getElementById('messagePreviewText');
+        const refreshButton = document.getElementById('refreshButton');
+        const refreshIcon = document.getElementById('refreshIcon');
+        const refreshText = document.getElementById('refreshText');
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const filterNameInput = document.getElementById('filterName');
+        const sortByScoreBtn = document.getElementById('sortByScoreBtn');
+        const sortByNameBtn = document.getElementById('sortByNameBtn');
+        const noLeadsMessage = document.getElementById('noLeadsMessage');
+
+        // Dynamic Score Card Elements
+        const dynamicLeadScore = document.getElementById('dynamicLeadScore');
+        const dynamicLeadScoreTier = document.getElementById('dynamicLeadScoreTier');
+        const dynamicLeadName = document.getElementById('dynamicLeadName');
+        const dynamicPoint1 = document.getElementById('dynamicPoint1');
+        const dynamicPoint2 = document.getElementById('dynamicPoint2');
+        const dynamicPoint3 = document.getElementById('dynamicPoint3');
+
+        // Modal Elements
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        let selectedLeadElement = null;
+
+        // --- MODAL FUNCTIONS ---
+        function showModal(message) {
+            modalMessage.textContent = message;
+            customModal.classList.add('visible');
+        }
+        modalCloseButton.addEventListener('click', () => {
+            customModal.classList.remove('visible');
+        });
+        customModal.addEventListener('click', (event) => { // Close on overlay click
+            if (event.target === customModal) {
+                customModal.classList.remove('visible');
+            }
+        });
+
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateDynamicScoreCard(lead) {
+            if (lead) {
+                dynamicLeadScore.textContent = lead.score;
+                dynamicLeadName.textContent = lead.name;
+                dynamicPoint1.textContent = lead.customPoints[0] ? `• ${lead.customPoints[0]}` : '';
+                dynamicPoint2.textContent = lead.customPoints[1] ? `• ${lead.customPoints[1]}` : '';
+                dynamicPoint3.textContent = lead.customPoints[2] ? `• ${lead.customPoints[2]}` : '';
+
+                if (lead.score >= 80) {
+                    dynamicLeadScoreTier.textContent = 'HIGH';
+                    dynamicLeadScoreTier.className = 'text-sm font-semibold bg-green-500 px-2 py-0.5 rounded-full inline-block mt-1';
+                } else if (lead.score >= 60) {
+                    dynamicLeadScoreTier.textContent = 'MEDIUM';
+                    dynamicLeadScoreTier.className = 'text-sm font-semibold bg-yellow-500 px-2 py-0.5 rounded-full inline-block mt-1';
+                } else {
+                    dynamicLeadScoreTier.textContent = 'LOW';
+                    dynamicLeadScoreTier.className = 'text-sm font-semibold bg-red-500 px-2 py-0.5 rounded-full inline-block mt-1';
+                }
+            } else { // Reset card if no lead selected (e.g., after refresh)
+                dynamicLeadScore.textContent = '--';
+                dynamicLeadScoreTier.textContent = 'N/A';
+                dynamicLeadScoreTier.className = 'text-sm font-semibold bg-gray-500 px-2 py-0.5 rounded-full inline-block mt-1';
+                dynamicLeadName.textContent = 'Select a Lead';
+                dynamicPoint1.textContent = '';
+                dynamicPoint2.textContent = '';
+                dynamicPoint3.textContent = '';
+            }
+        }
+        
+        function setActiveSortButton() {
+            document.querySelectorAll('.sort-button').forEach(btn => btn.classList.remove('active-sort'));
+            if (currentSort.type === 'score') sortByScoreBtn.classList.add('active-sort');
+            if (currentSort.type === 'name') sortByNameBtn.classList.add('active-sort');
+        }
+
+        // --- LEAD RENDERING & MANAGEMENT ---
+        function renderLeads() {
+            leadsContainer.innerHTML = ''; // Clear existing leads
+            
+            let filteredLeads = leadsData.filter(lead => 
+                lead.name.toLowerCase().includes(currentFilter.toLowerCase())
+            );
+
+            if (currentSort.type === 'score') {
+                filteredLeads.sort((a, b) => currentSort.direction === 'desc' ? b.score - a.score : a.score - b.score);
+            } else if (currentSort.type === 'name') {
+                filteredLeads.sort((a, b) => {
+                    const nameA = a.name.toLowerCase();
+                    const nameB = b.name.toLowerCase();
+                    if (nameA < nameB) return currentSort.direction === 'asc' ? -1 : 1;
+                    if (nameA > nameB) return currentSort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+            
+            if (filteredLeads.length === 0) {
+                noLeadsMessage.classList.remove('hidden');
+            } else {
+                noLeadsMessage.classList.add('hidden');
+            }
+
+            filteredLeads.forEach(lead => {
+                const leadElement = document.createElement('div');
+                leadElement.classList.add('lead-item', 'bg-slate-700', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'justify-between', 'items-center', 'cursor-pointer', 'transition-all', 'duration-200', 'ease-in-out');
+                leadElement.dataset.leadId = lead.id;
+
+                leadElement.innerHTML = `
+                    <div>
+                        <h4 class="font-semibold text-base text-slate-100">${lead.name}</h4>
+                        <p class="text-xs text-slate-400">Age ${lead.age} &bull; ${lead.location} &bull; Score: ${lead.score} &bull; Status: <span class="font-medium">${lead.status}</span></p>
+                    </div>
+                    <button data-name="${lead.name}" class="whatsapp-button text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center">
+                        <i class="fab fa-whatsapp mr-1.5"></i> WHATSAPP
+                    </button>
+                `;
+                leadsContainer.appendChild(leadElement);
+
+                leadElement.addEventListener('click', function() {
+                    messagePreviewText.textContent = lead.message;
+                    updateDynamicScoreCard(lead);
+
+                    if (selectedLeadElement) {
+                        selectedLeadElement.classList.remove('selected', 'bg-slate-600');
+                        selectedLeadElement.classList.add('bg-slate-700');
+                    }
+                    leadElement.classList.add('selected', 'bg-slate-600');
+                    leadElement.classList.remove('bg-slate-700');
+                    selectedLeadElement = leadElement;
+                });
+
+                const whatsappBtn = leadElement.querySelector('.whatsapp-button');
+                whatsappBtn.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const leadName = this.dataset.name;
+                    showModal(`Opening WhatsApp for ${leadName}... (This is a simulation)`);
+                });
+            });
+            setActiveSortButton();
+        }
+
+        // --- EVENT LISTENERS ---
+        refreshButton.addEventListener('click', () => {
+            refreshIcon.classList.add('fa-spin');
+            refreshText.textContent = 'LOADING...';
+            refreshButton.disabled = true;
+
+            setTimeout(() => { // Simulate API call
+                console.log('Refresh button clicked');
+                // Reset filter and sort to default or re-fetch data
+                currentFilter = '';
+                filterNameInput.value = '';
+                currentSort = { type: 'score', direction: 'desc' }; // Reset to default sort
+                
+                renderLeads();
+                messagePreviewText.textContent = 'Select a lead to see the message preview.';
+                updateDynamicScoreCard(null); // Reset dynamic card
+                if (selectedLeadElement) {
+                    selectedLeadElement.classList.remove('selected', 'bg-slate-600');
+                    selectedLeadElement.classList.add('bg-slate-700');
+                    selectedLeadElement = null;
+                }
+                
+                refreshIcon.classList.remove('fa-spin');
+                refreshText.textContent = 'REFRESH';
+                refreshButton.disabled = false;
+                showModal('Leads refreshed successfully!');
+
+                // Auto-select first lead if available after refresh
+                const firstLeadElement = leadsContainer.querySelector('.lead-item');
+                if (firstLeadElement) {
+                    firstLeadElement.click();
+                }
+
+            }, 1000);
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                const tabId = this.dataset.tab + "Content"; // e.g., homeContent
+
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+                // If switching to home or leads, ensure leads are rendered and first is selected
+                if (this.dataset.tab === 'home' || this.dataset.tab === 'leads') {
+                    document.getElementById('homeContent').classList.add('active'); // Both use homeContent
+                     if (!selectedLeadElement && leadsContainer.querySelector('.lead-item')) {
+                        leadsContainer.querySelector('.lead-item').click();
+                    }
+                }
+            });
+        });
+
+        filterNameInput.addEventListener('input', (e) => {
+            currentFilter = e.target.value;
+            renderLeads();
+            // If a lead was selected, try to keep it selected or select the first one
+            if (selectedLeadElement) {
+                const stillExists = leadsContainer.querySelector(`.lead-item[data-lead-id="${selectedLeadElement.dataset.leadId}"]`);
+                if (stillExists) {
+                    stillExists.classList.add('selected', 'bg-slate-600');
+                     selectedLeadElement = stillExists; // re-assign in case element was re-created
+                } else {
+                    selectedLeadElement = null;
+                    messagePreviewText.textContent = 'Select a lead to see the message preview.';
+                    updateDynamicScoreCard(null);
+                }
+            }
+            if (!selectedLeadElement && leadsContainer.querySelector('.lead-item')) {
+                 leadsContainer.querySelector('.lead-item').click();
+            } else if (!leadsContainer.querySelector('.lead-item')) { // No leads match filter
+                 messagePreviewText.textContent = 'No matching leads. Adjust your filter.';
+                 updateDynamicScoreCard(null);
+            }
+        });
+
+        sortByScoreBtn.addEventListener('click', () => {
+            currentSort = { type: 'score', direction: currentSort.type === 'score' && currentSort.direction === 'desc' ? 'asc' : 'desc' };
+            sortByScoreBtn.querySelector('i').className = `fas ${currentSort.direction === 'desc' ? 'fa-arrow-down-short-wide' : 'fa-arrow-up-wide-short'} ml-1`;
+            sortByNameBtn.querySelector('i').className = 'fas fa-sort-alpha-down ml-1'; // Reset other icon
+            renderLeads();
+        });
+
+        sortByNameBtn.addEventListener('click', () => {
+            currentSort = { type: 'name', direction: currentSort.type === 'name' && currentSort.direction === 'asc' ? 'desc' : 'asc' };
+            sortByNameBtn.querySelector('i').className = `fas ${currentSort.direction === 'asc' ? 'fa-sort-alpha-down' : 'fa-sort-alpha-up'} ml-1`;
+            sortByScoreBtn.querySelector('i').className = 'fas fa-arrow-down-short-wide ml-1'; // Reset other icon
+            renderLeads();
+        });
+
+        // --- INITIALIZATION ---
+        function initializeApp() {
+            renderLeads(); // Render leads with default sort
+            updateDynamicScoreCard(null); // Initialize score card empty
+
+            // Select the first lead by default if leads exist
+            const firstLeadElement = leadsContainer.querySelector('.lead-item');
+            if (firstLeadElement) {
+                firstLeadElement.click();
+            }
+            // Ensure Home tab content is active
+            document.getElementById('homeContent').classList.add('active');
+            document.querySelector('.nav-item[data-tab="home"]').classList.add('active');
+            setActiveSortButton(); // Set initial active sort button
+        }
+
+        initializeApp();
+
+    </script>
+</body>
+</html>
