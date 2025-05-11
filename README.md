@@ -1,7 +1,7 @@
 # <div align="center">LeadGenix</div>
 
 <div align="center">
-    <img src="./assets/logo.png" alt="LeadGenix Logo" width="300">
+    <img src="/logo1.png" alt="LeadGenix Logo" width="300">
     <p><em>AI-Powered Lead Generation & Outreach Automation</em></p>
 </div>
 
